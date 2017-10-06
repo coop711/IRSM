@@ -1,0 +1,5 @@
+"0","mag_z <- (quakes$mag - min(quakes$mag)) / max(quakes$mag)"
+"0","plot(quakes_spdf, "
+"0","     cex = mag_z * 3,"
+"0","     pch = 1,"
+"0","     col = '#FB6A4A80')"

@@ -1,0 +1,357 @@
+---
+title: "Untitled"
+author: "coop711"
+date: '2017 10 6 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Packages and Data
+
+```{r cars}
+library(GISTools)
+library(tidyverse)
+library(broom)
+data(georgia)
+ls()
+```
+
+## Georgia Maps
+
+```{r, fig.width = 7, fig.height = 7}
+plot(georgia)
+plot(georgia, 
+     col = "red", 
+     bg = "wheat")
+class(georgia)
+georgia_outline <- gUnaryUnion(georgia, 
+                               id = NULL)
+plot(georgia, 
+     asp = 1, 
+     col = "red", 
+     bg = "wheat", 
+     lty = 2, 
+     border = "blue")
+plot(georgia_outline, 
+     asp = 1, 
+     lwd = 3, 
+     add = TRUE)
+title(main = "The State of Georgia",
+      font.main = 2,
+      cex.main = 1.5, 
+      sub = "and its counties",
+      font.sub = 3,
+      col.sub = "blue")
+par(mfrow = c(1, 2),
+    mar = c(2, 0, 3, 0))
+plot(georgia, 
+     col = "red", 
+     bg = "wheat")
+title("georgia")
+plot(georgia2, 
+     col = "orange",
+     bg = "lightyellow")
+title("georgia2")
+par(mfrow = c(1,1))
+```
+
+## georgia
+
+```{r, fig.width = 7, fig.height = 7}
+str(georgia@data)
+georgia$Name
+georgia$id <- as.character(0:(nrow(georgia@data) - 1))
+georgia_df <- georgia %>%
+  tidy()
+str(georgia_df)
+table(sort(georgia_df$id))
+georgia_df <- left_join(georgia@data, georgia_df, 
+                        by = c("id" = "id"))
+str(georgia_df)
+ggplot(georgia_df, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill = "white", colour = "black") +
+  geom_text(aes(x = Longitud, y = Latitude, label = Name), size = 1) +
+  coord_map()
+```
+
+### County Names 
+
+```{r, fig.width = 7, fig.height = 7}
+Lat <- data.frame(georgia)[, 1] #> georgia$Latitude
+Lon <- data.frame(georgia)[, 2] #> georgia$Longitud
+Names <- data.frame(georgia)[, 13] #> georgia$Name
+plot(georgia, 
+     col = NA)
+text(Lon, Lat, 
+     labels = Names, 
+     cex = 0.5) #> Better than `pointLabel`
+# pl <- pointLabel(Lon, Lat, Names, offset = 0, cex = 0.5)
+```
+
+### Subregion
+
+```{r, fig.width = 7, fig.height = 7}
+counties <- c("Jefferson", "Jenkins", "Johnson", "Washington", "Glascock", "Emanuel", "Candler", "Bulloch", "Screven", "Richmond", "Burke")
+counties_idx <- which(georgia$Name %in% counties)
+counties_idx
+georgia_sub <- georgia[counties_idx, ]
+plot(georgia_sub, 
+     col = "gold1", 
+     border = "grey")
+plot(georgia_outline, 
+     add = TRUE, 
+     lwd = 2)
+text(Lon[counties_idx], Lat[counties_idx], 
+     labels = Names[counties_idx], 
+     cex = 1)
+plot(georgia, 
+     border = "grey", 
+     lwd = 0.5)
+plot(georgia_sub, 
+     col = "lightblue", 
+     add = TRUE)
+plot(georgia_outline,
+     lwd = 2, 
+     add = TRUE)
+title("Georgia with a subset of counties")
+```
+
+## Open Street Map
+
+```{r, fig.width = 7, fig.height = 7}
+# install.packages("OpenStreetMap", dependencies = TRUE)
+library(OpenStreetMap)
+ul <- as.vector(cbind(bbox(georgia_sub)[2, 2], 
+                      bbox(georgia_sub)[1, 1]))
+lr <- as.vector(cbind(bbox(georgia_sub)[2, 1], 
+                      bbox(georgia_sub)[1, 2]))
+MyMap <- openmap(upperLeft = ul, 
+                 lowerRight = lr, 
+                 zoom = 9, 
+                 type = 'osm') #> Try various `maptype`
+plot(MyMap, removeMargin = FALSE)
+plot(spTransform(georgia_sub, 
+                 osm()), 
+     lwd = 2, 
+     add = TRUE)
+```
+
+## RgoogleMaps, PBSmapping
+
+```{r, fig.width = 7, fig.height = 7}
+# install.packages(c("RgoogleMaps", "PBSmapping"))
+library(RgoogleMaps)
+library(PBSmapping)
+shp <- SpatialPolygons2PolySet(georgia_sub)
+bb <- qbbox(lat = shp[, "Y"], lon = shp[, "X"])
+MyMap <- GetMap.bbox(bb$lonR, bb$latR, destfile = "DC.jpg")
+PlotPolysOnStaticMap(MyMap,
+                     asp = 1,
+                     shp, 
+                     lwd = 2, 
+                     col = rgb(0.25, 0.25, 0.25, 0.025),
+                     add = FALSE)
+```
+
+## Mapping Polygons and Attributes 
+
+### Newhaven 
+
+```{r, fig.width = 7, fig.height = 7}
+rm(list = ls())
+data(newhaven)
+vacant_shades <- auto.shading(blocks$P_VACANT)
+vacant_shades
+choropleth(blocks, 
+           v = blocks$P_VACANT)
+choro.legend(533000, 161000, 
+             sh = vacant_shades)
+vacant_shades <- auto.shading(blocks$P_VACANT, 
+                              n = 7)
+choropleth(blocks, 
+           v = blocks$P_VACANT, 
+           shading = vacant_shades)
+choro.legend(533000, 161000, 
+             sh = vacant_shades)
+vacant_shades <- auto.shading(blocks$P_VACANT, 
+                              cols = brewer.pal(5, "Greens"))
+choropleth(blocks, 
+           v = blocks$P_VACANT, 
+           shading = vacant_shades)
+choro.legend(533000, 161000, 
+             sh = vacant_shades)
+vacant_shades <- auto.shading(blocks$P_VACANT, 
+                              cutter = rangeCuts,
+                              n = 5,
+                              cols = brewer.pal(5, "Blues"))
+choropleth(blocks, 
+           v = blocks$P_VACANT, 
+           shading = vacant_shades)
+choro.legend(533000, 161000, 
+             sh = vacant_shades)
+vacant_shades
+```
+
+### Codes
+
+```{r}
+choropleth
+auto.shading
+```
+
+## Mapping Points and Attributes
+
+```{r, fig.width = 7, fig.height = 7}
+plot(breach)
+plot(blocks)
+plot(breach, 
+     add = TRUE)
+plot(blocks)
+plot(breach, 
+     add = TRUE, 
+     pch = '@')
+plot(blocks)
+plot(breach, 
+     add = TRUE, 
+     pch = 16)
+plot(blocks)
+plot(breach, 
+     add = TRUE, 
+     pch = 1,
+     col = "red")
+brewer.pal(5, "Reds")
+pie(rep(1, 5), col = brewer.pal(5, "Reds"))
+add.alpha(brewer.pal(5, "Reds"), .50)
+plot(blocks)
+plot(breach, 
+     add = TRUE, 
+     pch = 1,
+     col = "#DE2D2680")
+```
+
+### Quakes
+
+```{r, fig.width = 7, fig.height = 7}
+data(quakes)
+head(quakes)
+class(quakes)
+coords_quakes <- cbind(long = quakes$long, 
+                       lat = quakes$lat)
+str(coords_quakes)
+#> SpatialPointDataFrame 만들기
+quakes_spdf <- SpatialPointsDataFrame(coords_quakes, data = data.frame(quakes))
+par(mfrow = c(1, 2))
+plot(quakes_spdf)
+plot(quakes_spdf, pch = 1, col = '#FB6A4A80')
+par(mfrow = c(1, 1))
+library(maps)
+plot(quakes_spdf, pch = 1, col = '#FB6A4A80')
+map('world2', fill = FALSE, add = TRUE)
+```
+
+### `georgia.polys`
+
+```{r, fig.width =7, fig.height = 7}
+data(georgia)
+class(georgia.polys)
+summary(georgia.polys)
+str(georgia.polys)
+tmp <- georgia.polys[c(1, 3, 151, 113)]
+t1 <- Polygon(tmp[1]); t1 <- Polygons(list(t1), "1")
+t2 <- Polygon(tmp[2]); t2 <- Polygons(list(t2), "2")
+t3 <- Polygon(tmp[3]); t3 <- Polygons(list(t3), "3")
+t4 <- Polygon(tmp[4]); t4 <- Polygons(list(t4), "4")
+tmp_Sp <- SpatialPolygons(list(t1, t2, t3, t4), 1:4)
+plot(tmp_Sp)
+names <- c("Appling", "Bacon", "Wayne", "Pierce")
+tmp_spdf <- SpatialPolygonsDataFrame(tmp_Sp, data = data.frame(names))
+data.frame(tmp_spdf)
+tmp_spdf@data
+plot(tmp_spdf, col = 2:5)
+```
+
+### `quakes`
+
+```{r, fig.width = 7, fig.height = 7}
+par(mfrow = c(2, 2))
+choropleth(quakes_spdf, 
+           v = quakes$mag)
+shades <- auto.shading(quakes$mag, 
+                       n = 6,
+                       cols = brewer.pal(6, "Greens"))
+str(shades)
+choropleth(quakes_spdf, 
+           v = quakes$mag,
+           shading = shades,
+           pch = 1)
+shades$cols <- add.alpha(shades$cols, 0.5)
+choropleth(quakes_spdf, 
+           v = quakes$mag,
+           shading = shades,
+           pch = 20)
+mag_z <- (quakes$mag - min(quakes$mag)) / max(quakes$mag)
+plot(quakes_spdf, 
+     cex = mag_z * 3,
+     pch = 1,
+     col = '#FB6A4A80')
+par(mfrow = c(1, 1))
+```
+
+```{r, fig.width = 7, fig.height = 7}
+par(mfrow = c(1, 2))
+tmp2 <- cut(quakes$mag, 
+            fivenum(quakes$mag),
+            include.lowest = TRUE)
+str(tmp2)
+class_mag <- match(tmp2, levels(tmp2))
+str(class_mag)
+pch_var <- c(0, 1, 2, 5)
+plot(quakes_spdf,
+     pch = pch_var[class_mag],
+     cex = 0.7,
+     col = '#252525B3')
+index_1 <- (quakes$mag >= 4 & quakes$mag < 5) + 0
+index_2 <- (quakes$mag >= 5 & quakes$mag < 5.5) * 2
+index_3 <- (quakes$mag >= 5.5) * 3
+cbind(index_1, index_2, index_3)
+class_mag2 <- index_1 + index_2 + index_3
+class_mag2
+col_var <- brewer.pal(3, "Blues")
+plot(quakes_spdf,
+     col = col_var[class_mag2],
+     cex = 1.4,
+     pch = 20)
+par(mfrow = c(1, 1))
+```
+
+## RgoogleMaps
+
+```{r, fig.width = 7, fig.height = 7}
+library(RgoogleMaps)
+class(quakes$lat)
+MyMap <- MapBackground(lat = quakes$lat, 
+                       lon = quakes$long,
+                       zoom = 10)
+PlotOnStaticMap(MyMap, 
+               quakes$lat,
+               quakes$long,
+               cex = mag_z + 0.3,
+               pch = 1,
+               col = '#FB6A4A80')
+MyMap <- MapBackground(lat = quakes$lat, 
+                       lon = quakes$long,
+                       zoom = 10,
+                       maptype = "satellite")
+PlotOnStaticMap(MyMap, 
+               quakes$lat,
+               quakes$long,
+               cex = mag_z + 0.3,
+               pch = 1,
+               col = '#FB6A4A80')
+```
+
+
+

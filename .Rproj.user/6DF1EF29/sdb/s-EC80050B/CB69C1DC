@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "# install.packages(\"GISTools\", dependencies = TRUE, repos = \"https://cran.rstudio.com\")\nlibrary(GISTools)\nlibrary(sp)\ndata(newhaven) #> data loading\nls()\npdf(file = \"../data/map%d.pdf\", onefile = FALSE) #> not working Console에서 `source()`전에\nplot(roads)\nclass(roads)\nplot(blocks)\nclass(blocks)\nplot(tracts)\nclass(tracts)\nplot(breach)\nclass(breach)\nhead(data.frame(blocks))\nhead(blocks@data)\nsummary(blocks)\nstr(blocks@data)\n# par(mar = c(0, 0, 0, 0))\nplot(blocks)\nplot(roads, \n     add = TRUE,\n     col = \"red\")\nplot(blocks)\nplot(breach, \n     add = TRUE, \n     col = \"red\")\n\nplot(blocks, \n     lwd = 0.5, \n     border = \"grey50\")\nplot(breach, \n     pch = 1, \n     col = \"red\", \n     add = TRUE)\n# loc_1 <- locator(1) #>  점을 찍어야 진도가 나감.\nloc_1 <- list(x = 534750, y = 152000)\nmap.scale(loc_1$x, loc_1$y, miles2ft(2), \"Miles\", 4, 0.5)\nnorth.arrow(loc_1$x, loc_1$y + 2000, miles2ft(0.25), col = \"lightblue\")\ntitle(\"New Haven, CT.\")\n# dev.off()  #> console 에서 실행\nsummary(blocks)\nsummary(breach)\nsummary(tracts)\nhead(data.frame(blocks))\nnames(data.frame(blocks))\ncolnames(data.frame(blocks))\ndata.frame(blocks)$P_VACANT\nblocks$P_VACANT\nhist(blocks$P_VACANT)\nbreach_dens <- kde.points(breach, lims = tracts)\nsummary(breach_dens)\nhead(data.frame(breach_dens))\nbreach_dens_grid <- as(breach_dens, \"SpatialGridDataFrame\")\nsummary(breach_dens_grid)\n",
+    "created" : 1507222032902.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4247813464",
+    "id" : "CB69C1DC",
+    "lastKnownWriteTime" : 1507280987,
+    "last_content_update" : 1507280987775,
+    "path" : "~/Google 드라이브/Works/Class/Data_Science/R.WD/IRSM/R/new_haven.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
