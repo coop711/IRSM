@@ -1,5 +1,0 @@
-"0","shades$cols <- add.alpha(shades$cols, 0.5)"
-"0","choropleth(quakes_spdf, "
-"0","           v = quakes$mag,"
-"0","           shading = shades,"
-"0","           pch = 20)"

@@ -1,26 +1,33 @@
-"0","ls()
+"0","library(GISTools)"
+"2","Loading required package: maptools
 "
-"1"," [1]"
-"1"," ""blocks""       "
-"1"," ""breach""       "
-"1"," ""burgres.f""    "
-"1"," ""burgres.n""    "
-"1"," ""famdisp""      "
-"1","
+"2","Checking rgeos availability: TRUE
 "
-"1"," [6]"
-"1"," ""g1""           "
+"2","Loading required package: RColorBrewer
+"
+"2","Loading required package: MASS
+"
+"0","library(tidyverse)"
+"2","Loading tidyverse: ggplot2
+Loading tidyverse: tibble
+Loading tidyverse: tidyr
+Loading tidyverse: readr
+Loading tidyverse: purrr
+Loading tidyverse: dplyr
+"
+"2","Conflicts with tidy packages -------------------------------------------------------------
+"
+"2","filter(): dplyr, stats
+lag():    dplyr, stats
+select(): dplyr, MASS
+"
+"0","library(broom)"
+"0","library(rgeos)"
+"0","data(georgia)"
+"0","ls()"
+"1","[1]"
 "1"," ""georgia""      "
-"1"," ""georgia_df""   "
 "1"," ""georgia.polys"""
 "1"," ""georgia2""     "
-"1","
-"
-"1","[11]"
-"1"," ""loc_1""        "
-"1"," ""places""       "
-"1"," ""roads""        "
-"1"," ""roads_df""     "
-"1"," ""tracts""       "
 "1","
 "

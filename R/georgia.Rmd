@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(GISTools)
 library(tidyverse)
 library(broom)
+library(rgeos)
 data(georgia)
 ls()
 ```
@@ -353,5 +354,46 @@ PlotOnStaticMap(MyMap,
                col = '#FB6A4A80')
 ```
 
+## Mapping Lines and Attributes
 
+```{r, fig.width = 12, fig.height = 4, eval = TRUE}
+data(newhaven)
+xmin <- bbox(roads)[1, 1]
+ymin <- bbox(roads)[2, 1]
+xmax <- xmin + diff(bbox(roads)[1, ]) / 2 
+# xmax <- bbox(roads)[1, 2]
+ymax <- ymin + diff(bbox(roads)[2, ]) / 2 
+# ymax <- bbox(roads)[2, 2]
+xx <- c(xmin, xmin, xmax, xmax, xmin)
+yy <- c(ymin, ymax, ymax, ymin, ymin)
+crds <- cbind(xx, yy)
+Pl <- Polygon(crds)
+Pl
+ID <- "clip"
+Pls <- Polygons(list(Pl), ID = ID)
+Pls
+SPls <- SpatialPolygons(list(Pls))
+df <- data.frame(value = 1, row.names = ID)
+df
+clip.bb <- SpatialPolygonsDataFrame(SPls, df)
+roads_tmp <- gIntersection(clip.bb, 
+                           roads, 
+                           byid = TRUE)
+head(names(roads_tmp))
+tmp <- as.numeric(gsub("clip", "", names(roads_tmp)))
+tmp <- data.frame(roads)[tmp, ]
+head(tmp)
+roads_tmp <- SpatialLinesDataFrame(roads_tmp, 
+                                   data = tmp, 
+                                   match.ID = FALSE)
+par(mfrow = c(1, 3))
+plot(roads_tmp)
+road_class <- unique(roads_tmp$AV_LEGEND)
+shades <- rev(brewer.pal(length(road_class), "Spectral"))
+tmp <- roads_tmp$AV_LEGEND
+index <- match(tmp, as.vector(road_class))
+plot(roads_tmp, col = shades[index], lwd = 3)
+plot(roads_tmp, lwd = roads_tmp$LENGTH_MI * 10)
+par(mfrow = c(1, 1))
+```
 
